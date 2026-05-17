@@ -1,19 +1,19 @@
 import express from "express";
-
 import { getTransactions, createTransaction, deleteTransaction, updateTransaction, getSummary } from "../Controllers/transactionController.js";
+import authMiddleware from "../Middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/summary", getSummary);
+router.get("/summary", authMiddleware, getSummary);
 
-router.get("/", getTransactions);
+router.get("/", authMiddleware, getTransactions);
 
-router.post("/", createTransaction);
+router.post("/", authMiddleware, createTransaction);
 
 
-router.delete("/:id", deleteTransaction);
+router.delete("/:id", authMiddleware, deleteTransaction);
 
-router.put("/:id", updateTransaction);
+router.put("/:id", authMiddleware, updateTransaction);
 
 
 

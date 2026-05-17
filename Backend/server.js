@@ -7,6 +7,7 @@ import './Database/db.js';
 import transactionRoutes from './Routes/transactionRoute.js';
 import errorMiddleware from './Middleware/errorMiddleware.js';
 import categoryRoutes from './Routes/categoryRoute.js';
+import authRoutes from "./Routes/authRoute.js";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 
 app.use('/transactions', transactionRoutes);
 app.use("/categories", categoryRoutes);
+app.use("/auth", authRoutes);
 
 app.get("/", (req, res) => {
     res.send("Server is Healthy!");

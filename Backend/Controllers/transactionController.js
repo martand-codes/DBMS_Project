@@ -3,6 +3,8 @@ import wrapAsync from "../Middleware/wrapasync.js";
 
 export const getTransactions = wrapAsync(async (req, res) => {
 
+    const user_id = req.user.id;
+    
     const query = `
         SELECT
             t.id,
@@ -12,13 +14,14 @@ export const getTransactions = wrapAsync(async (req, res) => {
             t.type,
             c.name AS category,
             t.transaction_date
-        FROM transactions t
-        JOIN categories c
-        ON t.category_id = c.id
-        ORDER BY t.transaction_date DESC
-    `;
+            FROM transactions t
+            JOIN categories c
+            ON t.category_id = c.id
+            WHERE t.user_id = ?
+            ORDER BY t.transaction_date DESC
+        `;
 
-    const [results] = await connection.query(query);
+    const [results] = await connection.query(query, [user_id]);
 
     res.status(200).json(results);
 
@@ -27,6 +30,8 @@ export const getTransactions = wrapAsync(async (req, res) => {
 // Creating Transaction
 
 export const createTransaction = wrapAsync(async (req, res) => {
+
+    const user_id = req.user.id;
 
     const {
         title,
@@ -52,17 +57,18 @@ export const createTransaction = wrapAsync(async (req, res) => {
 
     const query = `
         INSERT INTO transactions
-        (title, amount, type, category_id, transaction_date)
-        VALUES (?, ?, ?, ?, ?)
+        (title, amount, type, category_id, transaction_date, user_id)
+        VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
-        title,
-        amount,
-        type,
-        category_id,
-        transaction_date
-    ];
+    title,
+    amount,
+    type,
+    category_id,
+    transaction_date,
+    user_id
+];
 
     const [result] = await connection.query(query, values);
 
@@ -80,18 +86,25 @@ export const deleteTransaction = wrapAsync(async (req, res) => {
 
     const { id } = req.params;
 
+    const user_id = req.user.id;
+
     const query = `
         DELETE FROM transactions
-        WHERE id = ?
+        WHERE id = ? AND user_id = ?
     `;
 
-    const [result] = await connection.query(query, [id]);
+    const [result] = await connection.query(
+        query,
+        [id, user_id]
+    );
 
     if (result.affectedRows === 0) {
+
         return res.status(404).json({
             success: false,
             message: "Transaction Not Found"
         });
+
     }
 
     res.status(200).json({
@@ -107,6 +120,8 @@ export const updateTransaction = wrapAsync(async (req, res) => {
 
     const { id } = req.params;
 
+    const user_id = req.user.id;
+
     const {
         title,
         amount,
@@ -115,18 +130,20 @@ export const updateTransaction = wrapAsync(async (req, res) => {
         transaction_date
     } = req.body;
 
+    // Validation
     if (
         !title ||
         !amount ||
         !type ||
         !category_id ||
         !transaction_date
-    )
-        {
+    ) {
+
         return res.status(400).json({
             success: false,
             message: "All fields are required"
         });
+
     }
 
     const query = `
@@ -137,7 +154,7 @@ export const updateTransaction = wrapAsync(async (req, res) => {
             type = ?,
             category_id = ?,
             transaction_date = ?
-        WHERE id = ?
+        WHERE id = ? AND user_id = ?
     `;
 
     const values = [
@@ -146,16 +163,19 @@ export const updateTransaction = wrapAsync(async (req, res) => {
         type,
         category_id,
         transaction_date,
-        id
+        id,
+        user_id
     ];
 
     const [result] = await connection.query(query, values);
 
     if (result.affectedRows === 0) {
+
         return res.status(404).json({
             success: false,
             message: "Transaction Not Found"
         });
+
     }
 
     res.status(200).json({
@@ -169,15 +189,23 @@ export const updateTransaction = wrapAsync(async (req, res) => {
 
 export const getSummary = wrapAsync(async (req, res) => {
 
+    const user_id = req.user.id;
+
     const query = `
         SELECT
             SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS totalIncome,
 
             SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS totalExpense
+
         FROM transactions
+
+        WHERE user_id = ?
     `;
 
-    const [results] = await connection.query(query);
+    const [results] = await connection.query(
+        query,
+        [user_id]
+    );
 
     const summary = results[0];
 
