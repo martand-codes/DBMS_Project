@@ -1,89 +1,55 @@
-import { useEffect, useState } from "react";
+import {
+    BrowserRouter,
+    Routes,
+    Route,
+    Navigate
+} from "react-router-dom";
 
-import Navbar from "./Components/Navbar.jsx";
-import SummaryCards from "./Components/SummaryCards.jsx";
-import TransactionForm from "./Components/TransactionForm.jsx";
-import TransactionTable from "./Components/TransactionTable.jsx";
+import { useState } from "react";
 
-import API from "./Api/axios.js";
+import Dashboard from "./Pages/Dashboard";
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
 
 function App() {
 
-    const [summary, setSummary] = useState({
-        totalIncome: 0,
-        totalExpense: 0,
-        balance: 0
-    });
-
-    const fetchSummary = async () => {
-
-        try {
-
-            const response = await API.get("/transactions/summary");
-
-            setSummary({...response.data});
-
-        } catch (err) {
-            console.log(err);
-        }
-
-    };
-
-    const [transactions, setTransactions] = useState([]);
-    const [editingTransaction, setEditingTransaction] = useState(null);
-
-    const fetchTransactions = async () => {
-
-      try {
-
-        const response = await API.get("/transactions");
-
-        setTransactions(response.data);
-
-      } catch (err) {
-
-        console.log(err);
-
-        }
-
-    };
-
-    
-
-    useEffect(() => {
-
-      fetchSummary();
-
-      fetchTransactions();
-
-    }, []);
+    const [token, setToken] = useState(
+        localStorage.getItem("token")
+    );
 
     return (
 
-        <div className="min-h-screen bg-gray-100">
+        <BrowserRouter>
 
-            <Navbar balance={summary.balance} />
+            <Routes>
 
-            <div className="max-w-7xl mx-auto px-6">
-
-                <SummaryCards summary={summary} />
-                
-                <TransactionForm 
-                  fetchSummary={fetchSummary}
-                  fetchTransactions={fetchTransactions}
-                  editingTransaction={editingTransaction}
-                  setEditingTransaction={setEditingTransaction}
+                {/* Login */}
+                <Route
+                    path="/login"
+                    element={
+                        <Login setToken={setToken} />
+                    }
                 />
 
-                <TransactionTable
-                  transactions={transactions}
-                  fetchTransactions={fetchTransactions}
-                  fetchSummary={fetchSummary}
-                  setEditingTransaction={setEditingTransaction}
+                {/* Register */}
+                <Route
+                    path="/register"
+                    element={<Register setToken={setToken} />}
                 />
-            </div>
 
-        </div>
+                {/* Protected Dashboard */}
+                <Route
+                    path="/"
+                    element={
+                        token
+                        ? <Dashboard setToken={setToken} />
+                        : <Navigate to="/login" />
+                    }
+                />
+
+            </Routes>
+
+        </BrowserRouter>
 
     );
 

@@ -1,6 +1,18 @@
 import { Wallet } from "lucide-react";
 
-const Navbar = ({ balance }) => {
+const Navbar = ({ balance, setToken }) => {
+
+    // For Logout
+
+    const handleLogout = () => {
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setToken(null);
+
+    };
+
+    const user = JSON.parse(localStorage.getItem("user")) || {};
 
     return (
 
@@ -32,6 +44,10 @@ const Navbar = ({ balance }) => {
                 {/* Balance */}
                 <div className="hidden md:flex items-center gap-3">
 
+                    <h3 className="text-sm text-slate-300">
+                        Welcome, {user?.username}
+                    </h3>
+
                     <div className="bg-slate-800 px-4 py-2 rounded-lg">
 
                         <p className="text-sm text-slate-400">
@@ -42,7 +58,15 @@ const Navbar = ({ balance }) => {
                             ₹ {balance}
                         </h2>
 
+
                     </div>
+
+                    <button
+                        onClick={handleLogout}
+                        className="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition-all"
+                    >
+                        Logout
+                    </button>
 
                 </div>
 
