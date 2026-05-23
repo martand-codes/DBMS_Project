@@ -1,4 +1,11 @@
-import { Trash2, Pencil } from "lucide-react";
+import {
+    Trash2,
+    Pencil,
+    ChevronDown,
+    ChevronUp
+} from "lucide-react";
+
+import { useState } from "react";
 
 
 import API from "../api/axios";
@@ -34,6 +41,31 @@ const TransactionTable = ({
 
     };
 
+    const [showStats, setShowStats] =
+    useState(false);
+
+    const amounts = transactions.map(
+        (transaction) => Number(transaction.amount)
+    );
+
+    const average =
+        amounts.length > 0
+        ? (
+            amounts.reduce((a, b) => a + b, 0)
+            / amounts.length
+        ).toFixed(2)
+        : 0;
+
+    const maximum =
+        amounts.length > 0
+        ? Math.max(...amounts)
+        : 0;
+
+    const minimum =
+     amounts.length > 0
+        ? Math.min(...amounts)
+        : 0;
+
     return (
 
         <div className="bg-white shadow-lg rounded-2xl p-6 mt-8">
@@ -41,6 +73,92 @@ const TransactionTable = ({
             <h2 className="text-2xl font-bold mb-6">
                 Transactions
             </h2>
+
+            <div className="mb-6">
+
+                <button
+                    onClick={() =>
+            setShowStats(!showStats)
+        }
+        className="
+            flex items-center gap-2
+            bg-slate-900 text-white
+            px-4 py-3 rounded-xl
+            hover:bg-slate-800
+            transition-all
+        "
+    >
+
+        Transaction Statistics
+
+        {
+            showStats
+            ? <ChevronUp size={18} />
+            : <ChevronDown size={18} />
+        }
+
+    </button>
+
+    {
+        showStats && (
+
+            <div
+                className="
+                    mt-4
+                    bg-slate-100
+                    p-5
+                    rounded-2xl
+                    shadow-md
+                    grid grid-cols-1 md:grid-cols-3
+                    gap-4
+                "
+            >
+
+                {/* Average */}
+                <div className="bg-white p-4 rounded-xl shadow-sm">
+
+                    <h3 className="text-sm text-gray-500">
+                        Average Transaction
+                    </h3>
+
+                    <p className="text-2xl font-bold text-blue-600">
+                        ₹ {Number(average).toLocaleString("en-IN")}
+                    </p>
+
+                </div>
+
+                {/* Maximum */}
+                <div className="bg-white p-4 rounded-xl shadow-sm">
+
+                    <h3 className="text-sm text-gray-500">
+                        Highest Transaction
+                    </h3>
+
+                    <p className="text-2xl font-bold text-green-600">
+                        ₹ {maximum.toLocaleString("en-IN")}
+                    </p>
+
+                </div>
+
+                {/* Minimum */}
+                <div className="bg-white p-4 rounded-xl shadow-sm">
+
+                    <h3 className="text-sm text-gray-500">
+                        Minimum Transaction
+                    </h3>
+
+                    <p className="text-2xl font-bold text-red-600">
+                        ₹ {minimum.toLocaleString("en-IN")}
+                    </p>
+
+                </div>
+
+            </div>
+
+        )
+    }
+
+</div>
 
             <div className="overflow-x-auto">
 

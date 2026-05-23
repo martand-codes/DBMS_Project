@@ -266,6 +266,7 @@ npm run dev
 - Export Reports
 - Mobile Optimization
 - Profile Settings
+- Added Dynamic rendering for Average, Minimum and Maximum
 
 ---
 
