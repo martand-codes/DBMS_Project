@@ -44,6 +44,9 @@ const TransactionTable = ({
     const [showStats, setShowStats] =
     useState(false);
 
+    const [filterType, setFilterType] =
+    useState("all");
+
     const amounts = transactions.map(
         (transaction) => Number(transaction.amount)
     );
@@ -65,6 +68,72 @@ const TransactionTable = ({
      amounts.length > 0
         ? Math.min(...amounts)
         : 0;
+
+        let filteredTransactions = transactions;
+
+// Highest Transaction
+if (filterType === "highest") {
+
+    filteredTransactions =
+        transactions.filter(
+            (transaction) =>
+                Number(transaction.amount)
+                === maximum
+        );
+
+}
+
+// Lowest Transaction
+else if (filterType === "lowest") {
+
+    filteredTransactions =
+        transactions.filter(
+            (transaction) =>
+                Number(transaction.amount)
+                === minimum
+        );
+
+}
+
+// Average Transaction
+else if (
+    filterType === "average"
+    && transactions.length > 0
+) {
+
+    let closestTransaction =
+        transactions[0];
+
+    let smallestDifference =
+        Math.abs(
+            Number(transactions[0]?.amount)
+            - Number(average)
+        );
+
+    transactions.forEach((transaction) => {
+
+        const difference =
+            Math.abs(
+                Number(transaction.amount)
+                - Number(average)
+            );
+
+        if (difference < smallestDifference) {
+
+            smallestDifference =
+                difference;
+
+            closestTransaction =
+                transaction;
+
+        }
+
+    });
+
+    filteredTransactions =
+        [closestTransaction];
+
+}
 
     return (
 
@@ -160,7 +229,44 @@ const TransactionTable = ({
 
 </div>
 
+        <div className="mb-6">
+
+    <select
+        value={filterType}
+        onChange={(e) =>
+            setFilterType(e.target.value)
+        }
+        className="
+            border
+            p-3
+            rounded-xl
+            shadow-sm
+            bg-white
+        "
+    >
+
+        <option value="all">
+            All Transactions
+        </option>
+
+        <option value="highest">
+            Highest Transaction
+        </option>
+
+        <option value="lowest">
+            Lowest Transaction
+        </option>
+
+        <option value="average">
+            Average Transaction
+        </option>
+
+    </select>
+
+</div>
+
             <div className="overflow-x-auto">
+
 
                 <table className="w-full border-collapse">
 
@@ -199,7 +305,7 @@ const TransactionTable = ({
                     <tbody>
 
                         {
-                            transactions.map((transaction) => (
+                            filteredTransactions.map((transaction) => (
 
                                 <tr
                                     key={transaction.id}
